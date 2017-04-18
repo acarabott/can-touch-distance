@@ -58,7 +58,7 @@ class TouchDistance {
   set value(value) {
 
     this._value = value;
-    if (this.output !== undefined) { this.output.value = value; }
+    if (this.output !== undefined) { this.output.value = value.toFixed(1); }
     this.render();
   }
 
