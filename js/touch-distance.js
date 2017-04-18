@@ -19,10 +19,8 @@ class TouchDistance {
     this.max = 1.0;
     this._value = 0.5;
 
-    this.origin = undefined; // the points we will use
-    this.extent = undefined; // the points we will use
-
-    this.origin = new Point(0.5, 0.5);
+    this.origin = undefined; // the points we will use for touches
+    this.extent = undefined; // the points we will use for touches
 
     this.canvas.addEventListener('touchstart', e => this.updateTouches(e));
     this.canvas.addEventListener('touchend', e => this.updateTouches(e));
