@@ -28,4 +28,10 @@ class Point {
   mul(x, y = x) {
     return new Point(this.x * x, this.y * y);
   }
+
+  distance(point) {
+    const x = this.x - point.x;
+    const y = this.y - point.y;
+    return Math.sqrt((x * x) + (y * y));
+  }
 }
