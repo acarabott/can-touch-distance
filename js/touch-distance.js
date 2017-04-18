@@ -24,30 +24,21 @@ class TouchDistance {
 
     this.origin = new Point(0.5, 0.5);
 
-    Hammer.on(this.canvas, 'touchstart', event => {
-      event.preventDefault();
-      if (event.touches.length > 0) {
-        this.origin = this.getNormTouch(event.touches[0]);
-      }
-      if (event.touches.length > 1) {
-        this.extent = this.getNormTouch(event.touches[1]);
-      }
-      this.update();
-    });
-
-    Hammer.on(this.canvas, 'touchend', event => {
-      if (event.touches.length === 1) {
-        this.origin = this.getNormTouch(event.touches[0]);
-        this.extent = undefined;
-      }
-      if (event.touches.length === 0) {
-        this.origin = undefined;
-        this.extent = undefined;
-      }
-      this.update();
-    });
+    this.canvas.addEventListener('touchstart', e => this.updateTouches(e));
+    this.canvas.addEventListener('touchend', e => this.updateTouches(e));
+    this.canvas.addEventListener('touchmove', e => this.updateTouches(e));
 
     this.render();
+  }
+
+  updateTouches(event) {
+    event.preventDefault();
+    ['origin', 'extent'].forEach((label, i) => {
+      this[label] = event.touches.length > i
+        ? this.getNormTouch(event.touches[i])
+        : undefined;
+    });
+    this.update();
   }
 
   getNormTouch(touch) {
