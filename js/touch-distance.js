@@ -16,7 +16,7 @@ class TouchDistance {
     this.ctx = this.canvas.getContext('2d');
 
     this.min = 0.0;
-    this.max = 1.0;
+    this.mul = 1.0;
     this._value = 0.5;
 
     this.origin = undefined; // the points we will use for touches
@@ -47,7 +47,10 @@ class TouchDistance {
   }
 
   update() {
-    this.value = Math.random();
+    const haveTwo = [this.origin, this.extent].every(p => p !== undefined);
+    this.value = haveTwo
+      ? this.min + this.origin.distance(this.extent) * this.mul
+      : this.value;
   }
 
   get value() { return this._value; }
@@ -106,8 +109,8 @@ const box = document.getElementById('container');
 
 const dist = new TouchDistance();
 
-dist.min = 0;
-dist.max = 100;
+dist.min = 50;
+dist.mul = 100;
 
 createOutput(dist, box);
 dist.appendTo(box);
