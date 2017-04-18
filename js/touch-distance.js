@@ -4,14 +4,34 @@ document.ontouchmove = function(event){ event.preventDefault(); };
 class TouchDistance {
   constructor() {
     this.canvas = document.createElement('canvas');
-    this.canvas.width = 600;
-    this.canvas.height = 600;
+    {
+      const resize = event => {
+        this.canvas.width = window.innerWidth;
+        this.canvas.height = window.innerHeight;
+      };
+      document.body.addEventListener('resize', resize);
+      resize();
+    }
+
     this.ctx = this.canvas.getContext('2d');
 
     this.min = 0.0;
     this.max = 1.0;
-    this.value = 0.5;
+    this._value = 0.5;
 
+    this.origin = undefined; // the points we will use
+    this.extent = undefined; // the points we will use
+
+    this.origin = new Point(0.5, 0.5);
+    this.render();
+  }
+
+  get value() { return this._value; }
+
+  set value(value) {
+
+    this._value = value;
+    if (this.output !== undefined) { this.output.value = value; }
     this.render();
   }
 
@@ -19,15 +39,32 @@ class TouchDistance {
     domElement.appendChild(this.canvas);
   }
 
+  set outputElement(domElement) {
+    this.output = domElement;
+  }
+
+  get dims() { return [this.canvas.width, this.canvas.height]; }
+
+  renderTouch(point, style) {
+    const radius = 120;
+    this.ctx.fillStyle = style;
+    this.ctx.beginPath();
+    this.ctx.arc(...point.mul(...this.dims), radius, 0, Math.PI * 2, false);
+    this.ctx.fill();
+  }
+
   render() {
     this.ctx.save();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    this.ctx.fillStyle = 'rgba(43, 156, 212, 1.0)';
+    const touchRadius = 100;
+    if (this.origin !== undefined) {
+      this.renderTouch(this.origin, 'rgba(43, 156, 212, 1.0)');
+    }
 
-    this.ctx.beginPath();
-    this.ctx.arc(50, 50, 50, 0, Math.PI * 2, false);
-    this.ctx.fill();
+    if (this.extent !== undefined) {
+      this.renderTouch(this.extent, 'rgba(249, 182, 118, 1.0)');
+    }
 
     this.ctx.restore();
   }
