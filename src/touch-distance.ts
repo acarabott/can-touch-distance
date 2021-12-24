@@ -5,11 +5,31 @@ document.ontouchmove = function (event) {
   event.preventDefault();
 };
 
+const getContext = (canvas: HTMLCanvasElement) => {
+  const ctx = canvas.getContext("2d");
+
+  if (ctx === null) {
+    throw new Error("Could not get context for canvas");
+  }
+
+  return ctx;
+};
+
 class TouchDistance {
+  public min: number;
+  public mul: number;
+
+  private canvas: HTMLCanvasElement;
+  private ctx: CanvasRenderingContext2D;
+  private _value: number;
+  private origin: Point | undefined;
+  private extent: Point | undefined;
+  private output: HTMLInputElement | undefined;
+
   constructor() {
     this.canvas = document.createElement("canvas");
     {
-      const resize = (event) => {
+      const resize = () => {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
       };
@@ -17,7 +37,7 @@ class TouchDistance {
       resize();
     }
 
-    this.ctx = this.canvas.getContext("2d");
+    this.ctx = getContext(this.canvas);
 
     this.min = 0.0;
     this.mul = 1.0;
@@ -32,15 +52,16 @@ class TouchDistance {
 
     this.render();
   }
-  updateTouches(event) {
+
+  updateTouches(event: TouchEvent) {
     event.preventDefault();
-    ["origin", "extent"].forEach((label, i) => {
+    (["origin", "extent"] as const).forEach((label, i) => {
       this[label] = event.touches.length > i ? this.getNormTouch(event.touches[i]) : undefined;
     });
     this.update();
   }
 
-  getNormTouch(touch) {
+  getNormTouch(touch: Touch) {
     const bb = this.canvas.getBoundingClientRect();
     const x = (touch.clientX - bb.left) / this.canvas.width;
     const y = (touch.clientY - bb.top) / this.canvas.height;
@@ -48,8 +69,10 @@ class TouchDistance {
   }
 
   update() {
-    const haveTwo = [this.origin, this.extent].every((p) => p !== undefined);
-    this.value = haveTwo ? this.min + this.origin.distance(this.extent) * this.mul : this.value;
+    this.value =
+      this.origin !== undefined && this.extent !== undefined
+        ? this.min + this.origin.distance(this.extent) * this.mul
+        : this.value;
   }
 
   get value() {
@@ -64,23 +87,23 @@ class TouchDistance {
     this.render();
   }
 
-  appendTo(domElement) {
+  appendTo(domElement: HTMLElement) {
     domElement.appendChild(this.canvas);
   }
 
-  set outputElement(domElement) {
+  set outputElement(domElement: HTMLInputElement) {
     this.output = domElement;
   }
 
-  get dims() {
+  get dims(): [number, number] {
     return [this.canvas.width, this.canvas.height];
   }
 
-  renderTouch(point, style) {
-    const radius = 120;
+  renderTouch(point: Point, style: string) {
+    const radius = Math.min(100, Math.min(this.canvas.width, this.canvas.height) * 0.15);
     this.ctx.fillStyle = style;
     this.ctx.beginPath();
-    this.ctx.arc(...point.mul(...this.dims), radius, 0, Math.PI * 2, false);
+    this.ctx.arc(...point.mul(...this.dims).vals, radius, 0, Math.PI * 2, false);
     this.ctx.fill();
   }
 
@@ -88,7 +111,6 @@ class TouchDistance {
     this.ctx.save();
     this.ctx.clearRect(0, 0, this.canvas.width, this.canvas.height);
 
-    const touchRadius = 100;
     if (this.origin !== undefined) {
       this.renderTouch(this.origin, "rgba(43, 156, 212, 1.0)");
     }
@@ -101,20 +123,18 @@ class TouchDistance {
   }
 }
 
-function createOutput(input, parent = document.body) {
-  const output = document.createElement("input");
-  output.value = input.value;
-  output.classList.add("output");
-  parent.appendChild(output);
-  input.outputElement = output;
-}
-
-const box = document.getElementById("container");
+const container = document.createElement("div");
+container.id = "container";
+document.body.appendChild(container);
 
 const dist = new TouchDistance();
-
 dist.min = 50;
 dist.mul = 100;
 
-createOutput(dist, box);
-dist.appendTo(box);
+const output = document.createElement("input");
+output.value = dist.value.toString();
+output.classList.add("output");
+document.body.appendChild(output);
+
+dist.outputElement = output;
+dist.appendTo(container);

@@ -14,9 +14,8 @@ export class Point {
     return this.x <= point.x && this.y <= point.y;
   }
 
-  *[Symbol.iterator]() {
-    yield this.x;
-    yield this.y;
+  get vals(): [number, number] {
+    return [this.x, this.y];
   }
 
   toString() {
