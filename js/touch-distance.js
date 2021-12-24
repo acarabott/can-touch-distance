@@ -28,7 +28,6 @@ class TouchDistance {
 
     this.render();
   }
-
   updateTouches(event) {
     event.preventDefault();
     ['origin', 'extent'].forEach((label, i) => {
