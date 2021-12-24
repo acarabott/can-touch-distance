@@ -1,19 +1,23 @@
+import { Point } from "./Point";
+
 // prevent mobile scrolling
-document.ontouchmove = function(event){ event.preventDefault(); };
+document.ontouchmove = function (event) {
+  event.preventDefault();
+};
 
 class TouchDistance {
   constructor() {
-    this.canvas = document.createElement('canvas');
+    this.canvas = document.createElement("canvas");
     {
-      const resize = event => {
+      const resize = (event) => {
         this.canvas.width = window.innerWidth;
         this.canvas.height = window.innerHeight;
       };
-      document.body.addEventListener('resize', resize);
+      document.body.addEventListener("resize", resize);
       resize();
     }
 
-    this.ctx = this.canvas.getContext('2d');
+    this.ctx = this.canvas.getContext("2d");
 
     this.min = 0.0;
     this.mul = 1.0;
@@ -22,18 +26,16 @@ class TouchDistance {
     this.origin = undefined; // the points we will use for touches
     this.extent = undefined; // the points we will use for touches
 
-    this.canvas.addEventListener('touchstart', e => this.updateTouches(e));
-    this.canvas.addEventListener('touchend', e => this.updateTouches(e));
-    this.canvas.addEventListener('touchmove', e => this.updateTouches(e));
+    this.canvas.addEventListener("touchstart", (e) => this.updateTouches(e));
+    this.canvas.addEventListener("touchend", (e) => this.updateTouches(e));
+    this.canvas.addEventListener("touchmove", (e) => this.updateTouches(e));
 
     this.render();
   }
   updateTouches(event) {
     event.preventDefault();
-    ['origin', 'extent'].forEach((label, i) => {
-      this[label] = event.touches.length > i
-        ? this.getNormTouch(event.touches[i])
-        : undefined;
+    ["origin", "extent"].forEach((label, i) => {
+      this[label] = event.touches.length > i ? this.getNormTouch(event.touches[i]) : undefined;
     });
     this.update();
   }
@@ -46,18 +48,19 @@ class TouchDistance {
   }
 
   update() {
-    const haveTwo = [this.origin, this.extent].every(p => p !== undefined);
-    this.value = haveTwo
-      ? this.min + this.origin.distance(this.extent) * this.mul
-      : this.value;
+    const haveTwo = [this.origin, this.extent].every((p) => p !== undefined);
+    this.value = haveTwo ? this.min + this.origin.distance(this.extent) * this.mul : this.value;
   }
 
-  get value() { return this._value; }
+  get value() {
+    return this._value;
+  }
 
   set value(value) {
-
     this._value = value;
-    if (this.output !== undefined) { this.output.value = value.toFixed(1); }
+    if (this.output !== undefined) {
+      this.output.value = value.toFixed(1);
+    }
     this.render();
   }
 
@@ -69,7 +72,9 @@ class TouchDistance {
     this.output = domElement;
   }
 
-  get dims() { return [this.canvas.width, this.canvas.height]; }
+  get dims() {
+    return [this.canvas.width, this.canvas.height];
+  }
 
   renderTouch(point, style) {
     const radius = 120;
@@ -85,11 +90,11 @@ class TouchDistance {
 
     const touchRadius = 100;
     if (this.origin !== undefined) {
-      this.renderTouch(this.origin, 'rgba(43, 156, 212, 1.0)');
+      this.renderTouch(this.origin, "rgba(43, 156, 212, 1.0)");
     }
 
     if (this.extent !== undefined) {
-      this.renderTouch(this.extent, 'rgba(249, 182, 118, 1.0)');
+      this.renderTouch(this.extent, "rgba(249, 182, 118, 1.0)");
     }
 
     this.ctx.restore();
@@ -97,14 +102,14 @@ class TouchDistance {
 }
 
 function createOutput(input, parent = document.body) {
-  const output = document.createElement('input');
+  const output = document.createElement("input");
   output.value = input.value;
-  output.classList.add('output');
+  output.classList.add("output");
   parent.appendChild(output);
   input.outputElement = output;
 }
 
-const box = document.getElementById('container');
+const box = document.getElementById("container");
 
 const dist = new TouchDistance();
 
